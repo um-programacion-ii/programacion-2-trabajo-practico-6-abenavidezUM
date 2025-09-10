@@ -1,0 +1,99 @@
+# 🐳 Docker Compose para Sistema de Microservicios
+# Configuración de bases de datos MySQL y PostgreSQL
+# Autor: Agustin Benavidez - Legajo: 62344
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: microservices_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: microservices_db
+      MYSQL_USER: microservices_user
+      MYSQL_PASSWORD: microservices_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-scripts/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - microservices_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "microservices_user", "-pmicroservices_pass"]
+      timeout: 20s
+      retries: 10
+      interval: 30s
+      start_period: 40s
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: microservices_postgres
+    environment:
+      POSTGRES_DB: microservices_db
+      POSTGRES_USER: microservices_user
+      POSTGRES_PASSWORD: microservices_pass
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts/postgres:/docker-entrypoint-initdb.d
+    networks:
+      - microservices_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U microservices_user -d microservices_db"]
+      timeout: 20s
+      retries: 10
+      interval: 30s
+      start_period: 40s
+    restart: unless-stopped
+
+  # Opcional: Cliente de administración para MySQL
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: microservices_phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: microservices_user
+      PMA_PASSWORD: microservices_pass
+    ports:
+      - "8090:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - microservices_network
+    restart: unless-stopped
+    profiles:
+      - admin
+
+  # Opcional: Cliente de administración para PostgreSQL
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: microservices_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@microservices.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8091:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservices_network
+    restart: unless-stopped
+    profiles:
+      - admin
+
+volumes:
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+networks:
+  microservices_network:
+    driver: bridge
+    name: microservices_net
