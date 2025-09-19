@@ -1,0 +1,242 @@
+# Configuración principal del microservicio business-service
+# Autor: Agustin Benavidez - Legajo: 62344
+
+spring:
+  application:
+    name: business-service
+  profiles:
+    active: dev
+
+# Configuración del servidor
+server:
+  port: 8082
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Configuración de Feign Client
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+      data-service:
+        connectTimeout: 3000
+        readTimeout: 8000
+        loggerLevel: full
+  hystrix:
+    enabled: true
+  circuitbreaker:
+    enabled: true
+
+# Configuración de Circuit Breaker (Resilience4j)
+resilience4j:
+  circuitbreaker:
+    instances:
+      data-service:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: count_based
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+  retry:
+    instances:
+      data-service:
+        maxAttempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - feign.FeignException.InternalServerError
+          - java.net.ConnectException
+  timelimiter:
+    instances:
+      data-service:
+        timeoutDuration: 8s
+
+# Configuración de logging
+logging:
+  level:
+    com.microservices.businessservice: DEBUG
+    org.springframework.web: INFO
+    feign: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Configuración de Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,feign
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+
+# Información de la aplicación
+info:
+  app:
+    name: Business Service
+    description: Microservicio de lógica de negocio para gestión de productos
+    version: 1.0.0
+    author: Agustin Benavidez
+    legajo: 62344
+
+---
+# Profile de desarrollo
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+# URL del data-service
+data:
+  service:
+    url: http://localhost:8081
+
+server:
+  port: 8082
+
+logging:
+  level:
+    root: INFO
+    com.microservices.businessservice: DEBUG
+    feign: DEBUG
+
+# Configuración de timeouts más relajados para desarrollo
+feign:
+  client:
+    config:
+      data-service:
+        connectTimeout: 5000
+        readTimeout: 15000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      data-service:
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 70
+
+---
+# Profile de producción con MySQL
+spring:
+  config:
+    activate:
+      on-profile: mysql
+
+# URL del data-service
+data:
+  service:
+    url: http://localhost:8081
+
+server:
+  port: 8082
+
+logging:
+  level:
+    root: WARN
+    com.microservices.businessservice: INFO
+    feign: INFO
+
+# Configuración optimizada para producción
+feign:
+  client:
+    config:
+      data-service:
+        connectTimeout: 2000
+        readTimeout: 5000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      data-service:
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 30s
+        failureRateThreshold: 40
+
+---
+# Profile de producción con PostgreSQL
+spring:
+  config:
+    activate:
+      on-profile: postgres
+
+# URL del data-service
+data:
+  service:
+    url: http://localhost:8081
+
+server:
+  port: 8082
+
+logging:
+  level:
+    root: WARN
+    com.microservices.businessservice: INFO
+    feign: INFO
+
+# Configuración optimizada para producción
+feign:
+  client:
+    config:
+      data-service:
+        connectTimeout: 2000
+        readTimeout: 5000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      data-service:
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 30s
+        failureRateThreshold: 40
+
+---
+# Profile para testing
+spring:
+  config:
+    activate:
+      on-profile: test
+
+# URL del data-service mock
+data:
+  service:
+    url: http://localhost:8081
+
+server:
+  port: 0  # Puerto aleatorio para tests
+
+logging:
+  level:
+    root: WARN
+    com.microservices.businessservice: ERROR
+
+# Configuración rápida para tests
+feign:
+  client:
+    config:
+      data-service:
+        connectTimeout: 1000
+        readTimeout: 2000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      data-service:
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        waitDurationInOpenState: 1s
+        failureRateThreshold: 80
