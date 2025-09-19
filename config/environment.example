@@ -1,0 +1,171 @@
+# Archivo de ejemplo de variables de entorno para el sistema de microservicios
+# Autor: Agustin Benavidez - Legajo: 62344
+# Copiar este archivo como .env y ajustar los valores según el entorno
+
+# ========================================
+# CONFIGURACIÓN GENERAL
+# ========================================
+
+# Profiles de Spring Boot disponibles: dev, mysql, postgres, test
+SPRING_PROFILES_ACTIVE=dev
+
+# Puertos de los microservicios
+DATA_SERVICE_PORT=8081
+BUSINESS_SERVICE_PORT=8082
+
+# URL base para comunicación entre servicios
+DATA_SERVICE_URL=http://localhost:8081
+
+# ========================================
+# CONFIGURACIÓN DE MYSQL
+# ========================================
+
+MYSQL_ROOT_PASSWORD=root_password
+MYSQL_DATABASE=microservices_db
+MYSQL_USER=microservices_user
+MYSQL_PASSWORD=microservices_pass
+MYSQL_PORT=3306
+
+# Configuración avanzada de MySQL
+MYSQL_CHARSET=utf8mb4
+MYSQL_COLLATION=utf8mb4_unicode_ci
+
+# ========================================
+# CONFIGURACIÓN DE POSTGRESQL
+# ========================================
+
+POSTGRES_DB=microservices_db
+POSTGRES_USER=microservices_user
+POSTGRES_PASSWORD=microservices_pass
+POSTGRES_PORT=5432
+
+# Configuración avanzada de PostgreSQL
+POSTGRES_ENCODING=UTF8
+POSTGRES_LOCALE=en_US.UTF8
+
+# ========================================
+# CONFIGURACIÓN DE LOGGING
+# ========================================
+
+# Nivel de logs: ERROR, WARN, INFO, DEBUG, TRACE
+LOG_LEVEL_ROOT=INFO
+LOG_LEVEL_MICROSERVICES=DEBUG
+LOG_LEVEL_FEIGN=DEBUG
+
+# Directorio de logs
+LOG_DIR=./logs
+
+# ========================================
+# CONFIGURACIÓN DE FEIGN CLIENT
+# ========================================
+
+# Timeouts en milisegundos
+FEIGN_CONNECT_TIMEOUT=3000
+FEIGN_READ_TIMEOUT=8000
+
+# Configuración de Circuit Breaker
+CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD=50
+CIRCUIT_BREAKER_WAIT_DURATION=10s
+CIRCUIT_BREAKER_SLIDING_WINDOW_SIZE=10
+
+# ========================================
+# CONFIGURACIÓN DE DOCKER
+# ========================================
+
+# Red de Docker para los contenedores
+DOCKER_NETWORK=microservices_network
+
+# Nombres de contenedores
+MYSQL_CONTAINER_NAME=microservices_mysql
+POSTGRES_CONTAINER_NAME=microservices_postgres
+
+# Volúmenes para persistencia
+MYSQL_VOLUME=mysql_data
+POSTGRES_VOLUME=postgres_data
+
+# ========================================
+# CONFIGURACIÓN DE DESARROLLO
+# ========================================
+
+# Habilitar herramientas de desarrollo
+ENABLE_DEV_TOOLS=true
+ENABLE_H2_CONSOLE=true
+
+# Hot reload para desarrollo
+ENABLE_LIVE_RELOAD=true
+
+# ========================================
+# CONFIGURACIÓN DE PRODUCCIÓN
+# ========================================
+
+# Configuración de seguridad para producción
+ENABLE_ACTUATOR_SECURITY=true
+MANAGEMENT_PORT=9001
+
+# Configuración de conexiones de base de datos para producción
+DB_POOL_MIN_SIZE=5
+DB_POOL_MAX_SIZE=20
+DB_POOL_MAX_IDLE_TIME=300000
+
+# ========================================
+# CONFIGURACIÓN DE TESTING
+# ========================================
+
+# Base de datos para tests
+TEST_DATABASE_URL=jdbc:h2:mem:testdb
+TEST_DATABASE_DRIVER=org.h2.Driver
+
+# Puerto aleatorio para tests
+TEST_SERVER_PORT=0
+
+# ========================================
+# CONFIGURACIÓN DE MONITOREO
+# ========================================
+
+# Endpoints de Actuator a exponer
+ACTUATOR_ENDPOINTS=health,info,metrics,prometheus
+
+# Configuración de métricas
+ENABLE_PROMETHEUS_METRICS=true
+METRICS_EXPORT_ENABLED=true
+
+# ========================================
+# CONFIGURACIÓN ESPECÍFICA POR ENTORNO
+# ========================================
+
+# Desarrollo local
+# SPRING_PROFILES_ACTIVE=dev
+# DATA_SERVICE_URL=http://localhost:8081
+
+# Producción con MySQL
+# SPRING_PROFILES_ACTIVE=mysql
+# DATA_SERVICE_URL=http://data-service:8081
+# MYSQL_HOST=mysql-server
+# MYSQL_PORT=3306
+
+# Producción con PostgreSQL
+# SPRING_PROFILES_ACTIVE=postgres
+# DATA_SERVICE_URL=http://data-service:8081
+# POSTGRES_HOST=postgres-server
+# POSTGRES_PORT=5432
+
+# Testing
+# SPRING_PROFILES_ACTIVE=test
+# DATA_SERVICE_URL=http://localhost:8081
+
+# ========================================
+# NOTAS DE USO
+# ========================================
+
+# 1. Copiar este archivo como .env:
+#    cp config/environment.example .env
+
+# 2. Ajustar los valores según el entorno
+
+# 3. El archivo .env será cargado automáticamente por Docker Compose
+
+# 4. Para usar variables en Spring Boot:
+#    export $(cat .env | xargs) && ./mvnw spring-boot:run
+
+# 5. Para verificar las variables:
+#    ./scripts/monitor-system.sh
